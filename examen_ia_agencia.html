@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Examen · Introducción a la IA</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #191919;
+    --surface-2: #222222;
+    --border: #2e2e2e;
+    --border-accent: #3a3a3a;
+    --text: #f0ede8;
+    --text-muted: #7a776f;
+    --text-dim: #4a4845;
+    --accent: #e8c97a;
+    --accent-dim: rgba(232, 201, 122, 0.12);
+    --accent-glow: rgba(232, 201, 122, 0.06);
+    --green: #5ec97a;
+    --green-dim: rgba(94, 201, 122, 0.12);
+    --red: #e8715c;
+    --red-dim: rgba(232, 113, 92, 0.12);
+    --purple: #a08ae8;
+    --purple-dim: rgba(160, 138, 232, 0.12);
+    --teal: #5ecac0;
+    --teal-dim: rgba(94, 202, 192, 0.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(232,201,122,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,201,122,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 60px 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; animation: fadeIn 0.4s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── HEADER / INTRO ── */
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .big-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(36px, 6vw, 52px);
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+  .big-title em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .lead {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text-muted);
+    margin-bottom: 40px;
+    max-width: 520px;
+  }
+
+  /* Rules card */
+  .rules-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 36px;
+  }
+  .rules-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+  .rule-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  .rule-item:last-child { border-bottom: none; }
+  .rule-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+    border: 1px solid rgba(232,201,122,0.25);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* Name input */
+  .input-group { margin-bottom: 32px; }
+  .input-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    display: block;
+  }
+  .name-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border-accent);
+    border-radius: 12px;
+    padding: 16px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .name-input::placeholder { color: var(--text-dim); }
+  .name-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #0f0f0f;
+  }
+  .btn-primary:hover { background: #f0d68a; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(232,201,122,0.2); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-ghost {
+    background: var(--surface);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { border-color: var(--border-accent); color: var(--text); }
+
+  /* ── EXAM SCREEN ── */
+  .exam-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .exam-label { font-size: 13px; color: var(--text-muted); }
+  .exam-label span { color: var(--text); font-weight: 600; }
+
+  .progress-wrap {
+    width: 140px;
+    height: 4px;
+    background: var(--surface-2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #f0d68a);
+    border-radius: 4px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* Question card */
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px;
+    margin-bottom: 28px;
+  }
+  .q-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+  .q-tag-purple { background: var(--purple-dim); color: var(--purple); }
+  .q-tag-teal { background: var(--teal-dim); color: var(--teal); }
+  .q-tag-accent { background: var(--accent-dim); color: var(--accent); }
+
+  .q-number {
+    font-family: 'DM Serif Display', serif;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+  .q-text {
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--text);
+    margin-bottom: 28px;
+  }
+
+  /* ── QUESTION TYPES ── */
+
+  /* DRAG & DROP — Ordenar */
+  .sortable-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .sortable-item {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--text);
+    user-select: none;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  }
+  .sortable-item:active { cursor: grabbing; }
+  .sortable-item.dragging { opacity: 0.4; transform: scale(0.97); }
+  .sortable-item.drag-over { border-color: var(--accent); background: var(--accent-dim); }
+  .drag-handle {
+    color: var(--text-dim);
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .item-badge {
+    min-width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: var(--border);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* MATCH — Emparejar */
+  .match-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .match-col-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    padding: 0 4px;
+  }
+  .match-col { display: flex; flex-direction: column; gap: 8px; }
+  .match-item {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.4;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .match-item:hover { border-color: var(--border-accent); }
+  .match-item.selected { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+  .match-item.matched-ok { border-color: var(--green); background: var(--green-dim); color: var(--green); cursor: default; }
+  .match-item.matched-err { border-color: var(--red); background: var(--red-dim); color: var(--red); cursor: default; }
+  .match-line-indicator {
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: none;
+  }
+  .match-item.selected .match-line-indicator { display: block; }
+
+  /* FILL — Completar */
+  .fill-sentence {
+    font-size: 16px;
+    line-height: 2.2;
+    color: var(--text);
+  }
+  .fill-blank {
+    display: inline-block;
+    min-width: 120px;
+    border-bottom: 2px solid var(--accent);
+    padding: 0 4px 2px;
+    background: transparent;
+    color: var(--accent);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    outline: none;
+    text-align: center;
+  }
+  .fill-blank::placeholder { color: var(--text-dim); }
+  .fill-blank.ok { border-color: var(--green); color: var(--green); }
+  .fill-blank.err { border-color: var(--red); color: var(--red); }
+
+  /* SCENARIO — Escenario */
+  .scenario-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .scenario-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .choice-list { display: flex; flex-direction: column; gap: 8px; }
+  .choice-btn {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .choice-btn:hover:not(:disabled) { border-color: var(--border-accent); background: var(--surface); }
+  .choice-btn.selected { border-color: var(--accent); background: var(--accent-dim); }
+  .choice-btn.correct { border-color: var(--green); background: var(--green-dim); color: var(--green); }
+  .choice-btn.wrong { border-color: var(--red); background: var(--red-dim); color: var(--red); }
+  .choice-btn:disabled { cursor: default; }
+  .choice-letter {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    background: var(--border);
+    font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+    color: var(--text-muted);
+  }
+  .choice-btn.selected .choice-letter { background: rgba(232,201,122,0.3); color: var(--accent); }
+  .choice-btn.correct .choice-letter { background: rgba(94,201,122,0.3); color: var(--green); }
+  .choice-btn.wrong .choice-letter { background: rgba(232,113,92,0.3); color: var(--red); }
+
+  /* BUILD prompt */
+  .build-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .chip {
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-muted);
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .chip:hover:not(.used) { border-color: var(--border-accent); color: var(--text); }
+  .chip.used { opacity: 0.3; cursor: default; }
+  .build-drop-zone {
+    min-height: 100px;
+    border: 2px dashed var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-content: flex-start;
+    transition: border-color 0.2s;
+    margin-bottom: 10px;
+  }
+  .build-drop-zone.has-items { border-style: solid; border-color: var(--border-accent); }
+  .build-drop-zone-label {
+    font-size: 12px;
+    color: var(--text-dim);
+    align-self: center;
+    width: 100%;
+    text-align: center;
+  }
+  .placed-chip {
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    background: var(--accent-dim);
+    border: 1px solid rgba(232,201,122,0.3);
+    color: var(--accent);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .placed-chip:hover { opacity: 0.7; }
+  .placed-chip .remove-x { font-size: 14px; opacity: 0.6; }
+  .drop-hint { font-size: 12px; color: var(--text-dim); }
+
+  /* Feedback */
+  .feedback-box {
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-top: 16px;
+    font-size: 14px;
+    line-height: 1.6;
+    display: none;
+  }
+  .feedback-box.show { display: block; animation: fadeIn 0.3s ease; }
+  .feedback-box.correct-fb { background: var(--green-dim); border: 1px solid rgba(94,201,122,0.3); color: var(--green); }
+  .feedback-box.wrong-fb { background: var(--red-dim); border: 1px solid rgba(232,113,92,0.3); color: var(--red); }
+  .feedback-box.partial-fb { background: var(--accent-dim); border: 1px solid rgba(232,201,122,0.3); color: var(--accent); }
+  .feedback-icon { font-weight: 700; margin-right: 4px; }
+
+  /* Nav */
+  .nav-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  /* ── RESULTS SCREEN ── */
+  .result-header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .score-ring-wrap {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    margin: 0 auto 28px;
+  }
+  .score-ring-wrap svg { transform: rotate(-90deg); }
+  .score-ring-bg { fill: none; stroke: var(--surface-2); stroke-width: 10; }
+  .score-ring-fill {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 408;
+    stroke-dashoffset: 408;
+    transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1) 0.3s;
+  }
+  .score-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .score-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 44px;
+    line-height: 1;
+    color: var(--text);
+  }
+  .score-den { font-size: 16px; color: var(--text-muted); }
+  .result-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .result-subtitle { font-size: 15px; color: var(--text-muted); }
+
+  .grade-badge {
+    display: inline-block;
+    padding: 6px 20px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    margin-top: 12px;
+  }
+  .grade-A { background: var(--green-dim); color: var(--green); border: 1px solid rgba(94,201,122,0.3); }
+  .grade-B { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(232,201,122,0.3); }
+  .grade-C { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(160,138,232,0.3); }
+  .grade-D { background: var(--red-dim); color: var(--red); border: 1px solid rgba(232,113,92,0.3); }
+
+  .breakdown-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .breakdown-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+  .breakdown-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .breakdown-row:last-child { border-bottom: none; }
+  .bd-q { flex: 1; color: var(--text-muted); }
+  .bd-score {
+    font-weight: 600;
+    font-size: 15px;
+    min-width: 42px;
+    text-align: right;
+  }
+  .bd-score.ok { color: var(--green); }
+  .bd-score.partial { color: var(--accent); }
+  .bd-score.bad { color: var(--red); }
+  .bd-bar-wrap { width: 80px; height: 4px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+  .bd-bar { height: 100%; border-radius: 4px; }
+  .bd-bar.ok { background: var(--green); }
+  .bd-bar.partial { background: var(--accent); }
+  .bd-bar.bad { background: var(--red); }
+
+  /* screenshot card */
+  .cert-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cert-card::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 150px; height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,201,122,0.08), transparent 70%);
+    pointer-events: none;
+  }
+  .cert-logo {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+  }
+  .cert-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .cert-score-line {
+    font-size: 15px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+  .cert-score-line strong { color: var(--accent); }
+  .cert-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 16px 0;
+  }
+  .cert-meta {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .share-hint {
+    font-size: 13px;
+    color: var(--text-dim);
+    text-align: center;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .share-hint::before, .share-hint::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .action-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* Tooltip on confirm */
+  .confirm-hint {
+    font-size: 12px;
+    color: var(--text-dim);
+    text-align: right;
+    margin-top: 8px;
+    min-height: 18px;
+  }
+
+  @media (max-width: 500px) {
+    .question-card { padding: 24px 20px; }
+    .match-container { grid-template-columns: 1fr; }
+    .q-text { font-size: 17px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ══════════════════ INTRO SCREEN ══════════════════ -->
+  <div class="screen active" id="screen-intro">
+    <div class="eyebrow">Agencia · Plan Operativo IA</div>
+    <h1 class="big-title">Examen de<br><em>Introducción</em><br>a la IA</h1>
+    <p class="lead">5 preguntas interactivas para confirmar que te quedaron claros los conceptos del seminario. Sin estrés — es didáctico.</p>
+
+    <div class="rules-card">
+      <div class="rules-title">Cómo funciona</div>
+      <div class="rule-item"><div class="rule-num">1</div><span>Son 5 preguntas de distintos formatos: ordenar, emparejar, completar, elegir y construir.</span></div>
+      <div class="rule-item"><div class="rule-num">2</div><span>Cada pregunta vale hasta 2 puntos. Total: 10 puntos.</span></div>
+      <div class="rule-item"><div class="rule-num">3</div><span>Cuando confirmes una respuesta verás retroalimentación inmediata y podrás continuar.</span></div>
+      <div class="rule-item"><div class="rule-num">4</div><span>Al final verás tu calificación. Toma screenshot y compártela con tu equipo.</span></div>
+    </div>
+
+    <div class="input-group">
+      <label class="input-label" for="player-name">Tu nombre completo</label>
+      <input type="text" class="name-input" id="player-name" placeholder="Escríbelo aquí…" autocomplete="off">
+    </div>
+
+    <button class="btn btn-primary" id="start-btn" onclick="startExam()" disabled>
+      Comenzar examen →
+    </button>
+  </div>
+
+  <!-- ══════════════════ EXAM SCREEN ══════════════════ -->
+  <div class="screen" id="screen-exam">
+
+    <div class="exam-topbar">
+      <div class="exam-label">Hola, <span id="exam-name-label">—</span></div>
+      <div class="exam-label">Pregunta <span id="q-counter">1</span> de 5</div>
+      <div class="progress-wrap">
+        <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Q1 — DRAG & DROP: ordenar los 4 ingredientes de un prompt -->
+    <div class="question-wrap" id="q1" style="display:none">
+      <div class="question-card">
+        <div class="q-tag q-tag-teal">Ordenar</div>
+        <div class="q-number">Pregunta 1 / 5</div>
+        <div class="q-text">Arrastra los 4 ingredientes de un buen prompt en el orden que los vimos en el seminario (del primero al último).</div>
+        <div class="sortable-list" id="sort-list">
+          <div class="sortable-item" draggable="true" data-val="formato">
+            <span class="drag-handle">⠿</span><span class="item-badge" id="badge-0">—</span>Formato
+          </div>
+          <div class="sortable-item" draggable="true" data-val="tarea">
+            <span class="drag-handle">⠿</span><span class="item-badge" id="badge-1">—</span>Tarea
+          </div>
+          <div class="sortable-item" draggable="true" data-val="rol">
+            <span class="drag-handle">⠿</span><span class="item-badge" id="badge-2">—</span>Rol
+          </div>
+          <div class="sortable-item" draggable="true" data-val="contexto">
+            <span class="drag-handle">⠿</span><span class="item-badge" id="badge-3">—</span>Contexto
+          </div>
+        </div>
+        <div class="feedback-box" id="fb1"></div>
+      </div>
+      <div class="nav-row">
+        <div class="confirm-hint" id="hint1"></div>
+        <button class="btn btn-primary" id="confirm-q1" onclick="confirmQ1()">Confirmar respuesta</button>
+      </div>
+    </div>
+
+    <!-- Q2 — MATCH: emparejar concepto → analogía -->
+    <div class="question-wrap" id="q2" style="display:none">
+      <div class="question-card">
+        <div class="q-tag q-tag-purple">Emparejar</div>
+        <div class="q-number">Pregunta 2 / 5</div>
+        <div class="q-text">Relaciona cada concepto de la IA con la analogía que mejor lo explica.</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:4px;">
+          <div>
+            <div class="match-col-title">Concepto</div>
+            <div class="match-col" id="match-left">
+              <div class="match-item" data-id="A" onclick="matchClick('left','A')">Alucinación</div>
+              <div class="match-item" data-id="B" onclick="matchClick('left','B')">Ventana de contexto</div>
+              <div class="match-item" data-id="C" onclick="matchClick('left','C')">Fecha de corte</div>
+              <div class="match-item" data-id="D" onclick="matchClick('left','D')">La IA predice, no piensa</div>
+            </div>
+          </div>
+          <div>
+            <div class="match-col-title">Analogía</div>
+            <div class="match-col" id="match-right">
+              <div class="match-item" data-id="3" onclick="matchClick('right','3')">Linterna que solo ilumina las últimas páginas</div>
+              <div class="match-item" data-id="1" onclick="matchClick('right','1')">Autocomplete muy sofisticado</div>
+              <div class="match-item" data-id="2" onclick="matchClick('right','2')">Inventar un dato con tono seguro</div>
+              <div class="match-item" data-id="4" onclick="matchClick('right','4')">Enciclopedia impresa en 2023</div>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-box" id="fb2"></div>
+      </div>
+      <div class="nav-row">
+        <div class="confirm-hint" id="hint2"></div>
+        <button class="btn btn-primary" id="confirm-q2" onclick="confirmQ2()">Confirmar respuesta</button>
+      </div>
+    </div>
+
+    <!-- Q3 — FILL: completar enunciados -->
+    <div class="question-wrap" id="q3" style="display:none">
+      <div class="question-card">
+        <div class="q-tag q-tag-accent">Completar</div>
+        <div class="q-number">Pregunta 3 / 5</div>
+        <div class="q-text">Completa los enunciados con la palabra correcta.</div>
+        <div class="fill-sentence" style="margin-top:8px;">
+          <p style="margin-bottom:18px;">
+            La calidad de la respuesta de la IA depende principalmente del
+            <input class="fill-blank" id="fill1" placeholder="…" spellcheck="false">
+            que le des, no de la ortografía.
+          </p>
+          <p style="margin-bottom:18px;">
+            Cuando la IA genera un dato falso con total confianza, se llama
+            <input class="fill-blank" id="fill2" placeholder="…" spellcheck="false">.
+          </p>
+          <p>
+            Para evitar que la IA "se pierda", se recomienda que cada conversación tenga un solo
+            <input class="fill-blank" id="fill3" placeholder="…" spellcheck="false">.
+          </p>
+        </div>
+        <div class="feedback-box" id="fb3"></div>
+      </div>
+      <div class="nav-row">
+        <div class="confirm-hint" id="hint3"></div>
+        <button class="btn btn-primary" id="confirm-q3" onclick="confirmQ3()">Confirmar respuesta</button>
+      </div>
+    </div>
+
+    <!-- Q4 — SCENARIO: elegir la mejor acción -->
+    <div class="question-wrap" id="q4" style="display:none">
+      <div class="question-card">
+        <div class="q-tag q-tag-purple">Escenario real</div>
+        <div class="q-number">Pregunta 4 / 5</div>
+        <div class="q-text">Lee el escenario y elige la acción más correcta según lo visto en el seminario.</div>
+        <div class="scenario-box">
+          <div class="scenario-label">Situación</div>
+          Paulina, del equipo de comunicación, le pide a la IA: <em>"dame ideas para redes sociales"</em>. La IA le da 5 ideas muy genéricas que no sirven para el cliente. Paulina concluye que <strong>"la IA de hoy falló"</strong>.
+        </div>
+        <div class="choice-list">
+          <button class="choice-btn" id="c4a" onclick="selectChoice(4,'a')" data-id="a">
+            <span class="choice-letter">A</span>
+            Paulina tiene razón: la IA falló y hay que probar en otro chat.
+          </button>
+          <button class="choice-btn" id="c4b" onclick="selectChoice(4,'b')" data-id="b">
+            <span class="choice-letter">B</span>
+            El problema es el prompt: necesita agregar rol, tarea, contexto del cliente y formato esperado.
+          </button>
+          <button class="choice-btn" id="c4c" onclick="selectChoice(4,'c')" data-id="c">
+            <span class="choice-letter">C</span>
+            Debería activar la búsqueda en internet para que la IA mejore automáticamente sus respuestas.
+          </button>
+          <button class="choice-btn" id="c4d" onclick="selectChoice(4,'d')" data-id="d">
+            <span class="choice-letter">D</span>
+            Debe mejorar su ortografía y gramática al escribirle a la IA.
+          </button>
+        </div>
+        <div class="feedback-box" id="fb4"></div>
+      </div>
+      <div class="nav-row">
+        <div class="confirm-hint" id="hint4"></div>
+        <button class="btn btn-primary" id="confirm-q4" onclick="confirmQ4()" disabled>Confirmar respuesta</button>
+      </div>
+    </div>
+
+    <!-- Q5 — BUILD: armar un prompt con chips -->
+    <div class="question-wrap" id="q5" style="display:none">
+      <div class="question-card">
+        <div class="q-tag q-tag-teal">Construir</div>
+        <div class="q-number">Pregunta 5 / 5</div>
+        <div class="q-text">Arrastra o haz clic en los elementos que sí deben estar en un prompt bien construido. Ignora los que no pertenecen.</div>
+        <div style="margin-bottom:10px; font-size:13px; color:var(--text-muted);">Ingredientes disponibles:</div>
+        <div class="build-chips" id="chips-pool">
+          <div class="chip" data-val="rol" onclick="addChip(this)">🎭 Rol</div>
+          <div class="chip" data-val="tarea" onclick="addChip(this)">📋 Tarea</div>
+          <div class="chip" data-val="ortografia" onclick="addChip(this)">✍️ Buena ortografía</div>
+          <div class="chip" data-val="contexto" onclick="addChip(this)">📌 Contexto</div>
+          <div class="chip" data-val="formato" onclick="addChip(this)">📐 Formato</div>
+          <div class="chip" data-val="internet" onclick="addChip(this)">🌐 Activar internet</div>
+          <div class="chip" data-val="largo" onclick="addChip(this)">📜 Chat muy largo</div>
+        </div>
+        <div style="font-size:12px; color:var(--text-dim); margin-bottom:8px;">Tu prompt incluye:</div>
+        <div class="build-drop-zone" id="drop-zone">
+          <span class="build-drop-zone-label" id="dz-placeholder">Haz clic en los elementos de arriba para agregarlos aquí…</span>
+        </div>
+        <div class="feedback-box" id="fb5"></div>
+      </div>
+      <div class="nav-row">
+        <div class="confirm-hint" id="hint5"></div>
+        <button class="btn btn-primary" id="confirm-q5" onclick="confirmQ5()">Ver resultado</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════ RESULTS SCREEN ══════════════════ -->
+  <div class="screen" id="screen-results">
+
+    <div class="result-header">
+      <div class="score-ring-wrap">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          <circle class="score-ring-bg" cx="80" cy="80" r="65"/>
+          <circle class="score-ring-fill" id="ring-fill" cx="80" cy="80" r="65"/>
+        </svg>
+        <div class="score-center">
+          <span class="score-num" id="result-score-num">—</span>
+          <span class="score-den">/10</span>
+        </div>
+      </div>
+      <div class="result-name" id="result-name-display">—</div>
+      <div class="result-subtitle">Examen · Introducción a la IA</div>
+      <div class="grade-badge" id="grade-badge">—</div>
+    </div>
+
+    <div class="breakdown-card">
+      <div class="breakdown-title">Detalle por pregunta</div>
+      <div class="breakdown-row">
+        <div class="bd-q">P1 — Ingredientes del prompt (ordenar)</div>
+        <div class="bd-bar-wrap"><div class="bd-bar" id="bar-1"></div></div>
+        <div class="bd-score" id="bds-1">—</div>
+      </div>
+      <div class="breakdown-row">
+        <div class="bd-q">P2 — Conceptos y analogías (emparejar)</div>
+        <div class="bd-bar-wrap"><div class="bd-bar" id="bar-2"></div></div>
+        <div class="bd-score" id="bds-2">—</div>
+      </div>
+      <div class="breakdown-row">
+        <div class="bd-q">P3 — Términos clave (completar)</div>
+        <div class="bd-bar-wrap"><div class="bd-bar" id="bar-3"></div></div>
+        <div class="bd-score" id="bds-3">—</div>
+      </div>
+      <div class="breakdown-row">
+        <div class="bd-q">P4 — Escenario de prompt (elegir)</div>
+        <div class="bd-bar-wrap"><div class="bd-bar" id="bar-4"></div></div>
+        <div class="bd-score" id="bds-4">—</div>
+      </div>
+      <div class="breakdown-row">
+        <div class="bd-q">P5 — Construir un prompt (seleccionar)</div>
+        <div class="bd-bar-wrap"><div class="bd-bar" id="bar-5"></div></div>
+        <div class="bd-score" id="bds-5">—</div>
+      </div>
+    </div>
+
+    <!-- Certificate for screenshot -->
+    <div class="share-hint">Toma screenshot de esta tarjeta y compártela</div>
+    <div class="cert-card" id="cert-card">
+      <div class="cert-logo">Agencia · Seminario Introducción a la IA · 2025</div>
+      <div class="cert-name" id="cert-name">—</div>
+      <div class="cert-score-line">Calificación: <strong id="cert-score">—</strong> / 10 &nbsp;·&nbsp; <span id="cert-grade">—</span></div>
+      <hr class="cert-divider">
+      <div class="cert-meta" id="cert-date">—</div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn btn-ghost" onclick="resetExam()">← Volver a intentarlo</button>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+// ─── State ───────────────────────────────────────────────
+let playerName = '';
+let currentQ = 0;
+let scores = [0, 0, 0, 0, 0]; // max 2 each
+let confirmed = [false, false, false, false, false];
+
+// ─── Intro ───────────────────────────────────────────────
+document.getElementById('player-name').addEventListener('input', function() {
+  document.getElementById('start-btn').disabled = this.value.trim().length < 2;
+});
+document.getElementById('player-name').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && this.value.trim().length >= 2) startExam();
+});
+
+function startExam() {
+  playerName = document.getElementById('player-name').value.trim();
+  if (!playerName) return;
+  document.getElementById('exam-name-label').textContent = playerName.split(' ')[0];
+  showScreen('screen-exam');
+  showQuestion(1);
+}
+
+// ─── Screen helpers ──────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showQuestion(n) {
+  document.querySelectorAll('.question-wrap').forEach(w => w.style.display = 'none');
+  document.getElementById('q' + n).style.display = 'block';
+  document.getElementById('q-counter').textContent = n;
+  document.getElementById('progress-bar').style.width = ((n - 1) / 5 * 100) + '%';
+  currentQ = n;
+  if (n === 1) initSortable();
+  if (n === 2) initMatch();
+  updateBadges();
+}
+
+function nextQ() {
+  if (currentQ < 5) {
+    showQuestion(currentQ + 1);
+  } else {
+    showResults();
+  }
+}
+
+// ─── Q1: Drag & Drop ─────────────────────────────────────
+const correctOrder = ['rol', 'tarea', 'contexto', 'formato'];
+
+function initSortable() {
+  const list = document.getElementById('sort-list');
+  let dragSrc = null;
+
+  list.querySelectorAll('.sortable-item').forEach(item => {
+    item.addEventListener('dragstart', function(e) {
+      dragSrc = this;
+      this.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    item.addEventListener('dragend', function() {
+      this.classList.remove('dragging');
+      list.querySelectorAll('.sortable-item').forEach(i => i.classList.remove('drag-over'));
+      updateBadges();
+    });
+    item.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      if (this !== dragSrc) {
+        list.querySelectorAll('.sortable-item').forEach(i => i.classList.remove('drag-over'));
+        this.classList.add('drag-over');
+      }
+    });
+    item.addEventListener('drop', function(e) {
+      e.preventDefault();
+      if (this !== dragSrc) {
+        const allItems = [...list.querySelectorAll('.sortable-item')];
+        const srcIdx = allItems.indexOf(dragSrc);
+        const tgtIdx = allItems.indexOf(this);
+        if (srcIdx < tgtIdx) list.insertBefore(dragSrc, this.nextSibling);
+        else list.insertBefore(dragSrc, this);
+        updateBadges();
+      }
+    });
+  });
+}
+
+function updateBadges() {
+  const items = document.querySelectorAll('#sort-list .sortable-item');
+  items.forEach((item, i) => {
+    item.querySelector('.item-badge').textContent = i + 1;
+  });
+}
+
+function confirmQ1() {
+  if (confirmed[0]) { nextQ(); return; }
+  const items = [...document.querySelectorAll('#sort-list .sortable-item')];
+  const userOrder = items.map(i => i.dataset.val);
+  let correct = 0;
+  userOrder.forEach((val, i) => { if (val === correctOrder[i]) correct++; });
+
+  let score = 0;
+  let fbClass, fbMsg;
+  if (correct === 4) {
+    score = 2; fbClass = 'correct-fb';
+    fbMsg = '✓ ¡Perfecto! Rol → Tarea → Contexto → Formato. Esos son los 4 ingredientes en orden.';
+  } else if (correct >= 2) {
+    score = 1; fbClass = 'partial-fb';
+    fbMsg = `⚡ Casi. Tuviste ${correct}/4 en la posición correcta. El orden correcto es: Rol → Tarea → Contexto → Formato.`;
+  } else {
+    score = 0; fbClass = 'wrong-fb';
+    fbMsg = '✗ El orden correcto es: Rol → Tarea → Contexto → Formato. Recuerda la fórmula práctica del seminario.';
+  }
+
+  scores[0] = score;
+  confirmed[0] = true;
+  showFeedback('fb1', fbClass, fbMsg);
+  lockSortable();
+  document.getElementById('confirm-q1').textContent = 'Siguiente →';
+}
+
+function lockSortable() {
+  document.querySelectorAll('#sort-list .sortable-item').forEach(i => {
+    i.setAttribute('draggable', false);
+    i.style.cursor = 'default';
+  });
+}
+
+// ─── Q2: Match ───────────────────────────────────────────
+const correctPairs = { A: '2', B: '3', C: '4', D: '1' };
+let matchState = { leftSel: null, rightSel: null, matched: {} };
+
+function initMatch() {
+  matchState = { leftSel: null, rightSel: null, matched: {} };
+}
+
+function matchClick(side, id) {
+  if (confirmed[1]) return;
+  const el = document.querySelector(`[data-id="${id}"]`);
+  if (el.classList.contains('matched-ok') || el.classList.contains('matched-err')) return;
+
+  if (side === 'left') {
+    document.querySelectorAll('#match-left .match-item').forEach(i => i.classList.remove('selected'));
+    if (matchState.leftSel === id) { matchState.leftSel = null; return; }
+    el.classList.add('selected');
+    matchState.leftSel = id;
+  } else {
+    document.querySelectorAll('#match-right .match-item').forEach(i => i.classList.remove('selected'));
+    if (matchState.rightSel === id) { matchState.rightSel = null; return; }
+    el.classList.add('selected');
+    matchState.rightSel = id;
+  }
+
+  if (matchState.leftSel && matchState.rightSel) {
+    const L = matchState.leftSel, R = matchState.rightSel;
+    const isOk = correctPairs[L] === R;
+    const lEl = document.querySelector(`#match-left [data-id="${L}"]`);
+    const rEl = document.querySelector(`#match-right [data-id="${R}"]`);
+    lEl.classList.remove('selected');
+    rEl.classList.remove('selected');
+    if (isOk) {
+      lEl.classList.add('matched-ok');
+      rEl.classList.add('matched-ok');
+      matchState.matched[L] = R;
+    } else {
+      lEl.classList.add('matched-err');
+      rEl.classList.add('matched-err');
+      setTimeout(() => {
+        lEl.classList.remove('matched-err');
+        rEl.classList.remove('matched-err');
+      }, 800);
+    }
+    matchState.leftSel = null;
+    matchState.rightSel = null;
+  }
+}
+
+function confirmQ2() {
+  if (confirmed[1]) { nextQ(); return; }
+  const correct = Object.keys(correctPairs).filter(k => matchState.matched[k] === correctPairs[k]).length;
+  let score = 0, fbClass, fbMsg;
+  if (correct === 4) {
+    score = 2; fbClass = 'correct-fb';
+    fbMsg = '✓ ¡Excelente! Relacionaste correctamente los 4 conceptos con sus analogías.';
+  } else if (correct >= 2) {
+    score = 1; fbClass = 'partial-fb';
+    fbMsg = `⚡ Lograste ${correct}/4 pares. Alucinación = inventar con confianza · Ventana de contexto = linterna · Fecha de corte = enciclopedia 2023 · Predice = autocomplete.`;
+  } else {
+    score = 0; fbClass = 'wrong-fb';
+    fbMsg = '✗ Repasa las analogías: Alucinación = inventar un dato con tono seguro · Ventana de contexto = linterna en últimas páginas · Fecha de corte = enciclopedia impresa en 2023 · Predice = autocomplete sofisticado.';
+  }
+  scores[1] = score;
+  confirmed[1] = true;
+  showFeedback('fb2', fbClass, fbMsg);
+  document.getElementById('confirm-q2').textContent = 'Siguiente →';
+}
+
+// ─── Q3: Fill ────────────────────────────────────────────
+const fillAnswers = [
+  { id: 'fill1', accepted: ['contexto', 'información', 'contexto que', 'información que'] },
+  { id: 'fill2', accepted: ['alucinación', 'alucinacion', 'alucinaciones'] },
+  { id: 'fill3', accepted: ['objetivo', 'propósito', 'proposito', 'tarea', 'objetivo claro'] }
+];
+
+function confirmQ3() {
+  if (confirmed[2]) { nextQ(); return; }
+  let correct = 0;
+  fillAnswers.forEach(({ id, accepted }) => {
+    const val = document.getElementById(id).value.trim().toLowerCase();
+    const ok = accepted.some(a => val.includes(a));
+    const el = document.getElementById(id);
+    el.classList.remove('ok', 'err');
+    el.classList.add(ok ? 'ok' : 'err');
+    if (ok) correct++;
+    el.disabled = true;
+  });
+
+  let score = 0, fbClass, fbMsg;
+  if (correct === 3) {
+    score = 2; fbClass = 'correct-fb'; fbMsg = '✓ ¡Perfecto! Contexto → Alucinación → Objetivo.';
+  } else if (correct >= 1) {
+    score = 1; fbClass = 'partial-fb';
+    fbMsg = `⚡ ${correct}/3 correctas. Las respuestas son: (1) contexto, (2) alucinación, (3) objetivo.`;
+  } else {
+    score = 0; fbClass = 'wrong-fb';
+    fbMsg = '✗ Las respuestas correctas son: (1) contexto, (2) alucinación, (3) objetivo.';
+  }
+  scores[2] = score;
+  confirmed[2] = true;
+  showFeedback('fb3', fbClass, fbMsg);
+  document.getElementById('confirm-q3').textContent = 'Siguiente →';
+}
+
+// ─── Q4: Scenario ────────────────────────────────────────
+let q4Selected = null;
+
+function selectChoice(q, id) {
+  if (confirmed[3]) return;
+  q4Selected = id;
+  ['a','b','c','d'].forEach(x => {
+    document.getElementById('c4'+x).classList.remove('selected');
+  });
+  document.getElementById('c4'+id).classList.add('selected');
+  document.getElementById('confirm-q4').disabled = false;
+}
+
+function confirmQ4() {
+  if (confirmed[3]) { nextQ(); return; }
+  if (!q4Selected) return;
+  ['a','b','c','d'].forEach(x => {
+    document.getElementById('c4'+x).disabled = true;
+    document.getElementById('c4'+x).classList.remove('selected');
+  });
+
+  let score = 0, fbClass, fbMsg;
+  if (q4Selected === 'b') {
+    score = 2; fbClass = 'correct-fb';
+    fbMsg = '✓ ¡Correcto! El problema es el prompt pobre. Con rol, tarea, contexto y formato la IA da resultados mucho más útiles.';
+    document.getElementById('c4b').classList.add('correct');
+  } else {
+    score = 0; fbClass = 'wrong-fb';
+    fbMsg = '✗ La respuesta correcta es B. La IA no "falla" — el prompt necesita más contexto: rol, tarea, datos del cliente y formato esperado.';
+    document.getElementById('c4'+q4Selected).classList.add('wrong');
+    document.getElementById('c4b').classList.add('correct');
+  }
+  scores[3] = score;
+  confirmed[3] = true;
+  showFeedback('fb4', fbClass, fbMsg);
+  document.getElementById('confirm-q4').textContent = 'Siguiente →';
+  document.getElementById('confirm-q4').disabled = false;
+}
+
+// ─── Q5: Build prompt ────────────────────────────────────
+const correctChips = ['rol', 'tarea', 'contexto', 'formato'];
+const wrongChips = ['ortografia', 'internet', 'largo'];
+let placedChips = [];
+
+function addChip(el) {
+  if (el.classList.contains('used') || confirmed[4]) return;
+  const val = el.dataset.val;
+  placedChips.push(val);
+  el.classList.add('used');
+  renderDropZone();
+}
+
+function removeChip(val) {
+  if (confirmed[4]) return;
+  placedChips = placedChips.filter((v, i) => {
+    if (v === val) { val = null; return false; }
+    return true;
+  });
+  // re-enable the chip
+  document.querySelectorAll('#chips-pool .chip').forEach(c => {
+    if (c.dataset.val === val) c.classList.remove('used');
+  });
+  // actually filter first occurrence
+  const idx = placedChips.indexOf(val);
+  renderDropZone();
+}
+
+function removeChipByIdx(val) {
+  if (confirmed[4]) return;
+  const idx = placedChips.indexOf(val);
+  if (idx !== -1) placedChips.splice(idx, 1);
+  document.querySelectorAll('#chips-pool .chip').forEach(c => {
+    if (c.dataset.val === val) c.classList.remove('used');
+  });
+  renderDropZone();
+}
+
+function renderDropZone() {
+  const dz = document.getElementById('drop-zone');
+  const ph = document.getElementById('dz-placeholder');
+  dz.querySelectorAll('.placed-chip').forEach(c => c.remove());
+  if (placedChips.length === 0) {
+    ph.style.display = 'block';
+    dz.classList.remove('has-items');
+  } else {
+    ph.style.display = 'none';
+    dz.classList.add('has-items');
+    placedChips.forEach(val => {
+      const labels = { rol:'🎭 Rol', tarea:'📋 Tarea', ortografia:'✍️ Buena ortografía', contexto:'📌 Contexto', formato:'📐 Formato', internet:'🌐 Activar internet', largo:'📜 Chat muy largo' };
+      const div = document.createElement('div');
+      div.className = 'placed-chip';
+      div.innerHTML = `${labels[val]} <span class="remove-x" onclick="removeChipByIdx('${val}')">✕</span>`;
+      dz.appendChild(div);
+    });
+  }
+}
+
+function confirmQ5() {
+  if (confirmed[4]) { showResults(); return; }
+  const goodPlaced = placedChips.filter(v => correctChips.includes(v));
+  const badPlaced = placedChips.filter(v => wrongChips.includes(v));
+  const missedGood = correctChips.filter(v => !placedChips.includes(v));
+
+  let score = 0, fbClass, fbMsg;
+  if (goodPlaced.length === 4 && badPlaced.length === 0) {
+    score = 2; fbClass = 'correct-fb';
+    fbMsg = '✓ ¡Perfecto! Seleccionaste exactamente los 4 ingredientes correctos: Rol, Tarea, Contexto y Formato.';
+  } else if (goodPlaced.length >= 2 && badPlaced.length <= 1) {
+    score = 1; fbClass = 'partial-fb';
+    fbMsg = `⚡ Casi. Los 4 ingredientes correctos son: Rol, Tarea, Contexto y Formato. La buena ortografía, internet activado o el chat largo no son ingredientes del prompt.`;
+  } else {
+    score = 0; fbClass = 'wrong-fb';
+    fbMsg = '✗ Los ingredientes de un buen prompt son: Rol, Tarea, Contexto y Formato. La ortografía, el internet y los chats largos no mejoran el prompt por sí solos.';
+  }
+  scores[4] = score;
+  confirmed[4] = true;
+  showFeedback('fb5', fbClass, fbMsg);
+  document.getElementById('confirm-q5').textContent = 'Ver resultado →';
+}
+
+// ─── Feedback helper ─────────────────────────────────────
+function showFeedback(id, cls, msg) {
+  const el = document.getElementById(id);
+  el.className = 'feedback-box ' + cls + ' show';
+  el.innerHTML = msg;
+}
+
+// ─── Results ─────────────────────────────────────────────
+function showResults() {
+  document.getElementById('progress-bar').style.width = '100%';
+  showScreen('screen-results');
+
+  const total = scores.reduce((a, b) => a + b, 0);
+  document.getElementById('result-score-num').textContent = total;
+  document.getElementById('result-name-display').textContent = playerName;
+
+  // Ring
+  const circumference = 408;
+  const pct = total / 10;
+  document.getElementById('ring-fill').style.strokeDashoffset = circumference - (circumference * pct);
+
+  // Grade
+  let grade, gradeCls, gradeMsg;
+  if (total >= 9) { grade = 'Excelente'; gradeCls = 'grade-A'; gradeMsg = '¡Dominas los conceptos del seminario!'; }
+  else if (total >= 7) { grade = 'Bien'; gradeCls = 'grade-B'; gradeMsg = 'Buenos fundamentos, repasa los detalles.'; }
+  else if (total >= 5) { grade = 'Regular'; gradeCls = 'grade-C'; gradeMsg = 'Repasa el material del seminario.'; }
+  else { grade = 'A repasar'; gradeCls = 'grade-D'; gradeMsg = 'Se recomienda volver a ver el seminario.'; }
+
+  const badgeEl = document.getElementById('grade-badge');
+  badgeEl.textContent = grade + ' — ' + gradeMsg;
+  badgeEl.className = 'grade-badge ' + gradeCls;
+
+  // Breakdown bars
+  scores.forEach((s, i) => {
+    const bar = document.getElementById('bar-' + (i+1));
+    const label = document.getElementById('bds-' + (i+1));
+    const pct = (s / 2) * 100;
+    bar.style.width = pct + '%';
+    label.textContent = s + '/2';
+    if (s === 2) { bar.className = 'bd-bar ok'; label.className = 'bd-score ok'; }
+    else if (s === 1) { bar.className = 'bd-bar partial'; label.className = 'bd-score partial'; }
+    else { bar.className = 'bd-bar bad'; label.className = 'bd-score bad'; }
+  });
+
+  // Certificate
+  document.getElementById('cert-name').textContent = playerName;
+  document.getElementById('cert-score').textContent = total;
+  document.getElementById('cert-grade').textContent = grade;
+  const now = new Date();
+  document.getElementById('cert-date').textContent =
+    'Completado el ' + now.toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' }) +
+    ' · Seminario Introducción a la IA · Agencia';
+}
+
+function resetExam() {
+  scores = [0,0,0,0,0];
+  confirmed = [false,false,false,false,false];
+  placedChips = [];
+  q4Selected = null;
+  matchState = { leftSel: null, rightSel: null, matched: {} };
+
+  // Reset inputs
+  document.getElementById('player-name').value = '';
+  document.getElementById('start-btn').disabled = true;
+
+  // Reset fills
+  ['fill1','fill2','fill3'].forEach(id => {
+    const el = document.getElementById(id);
+    el.value = ''; el.disabled = false;
+    el.classList.remove('ok','err');
+  });
+
+  // Reset choices
+  ['a','b','c','d'].forEach(x => {
+    const el = document.getElementById('c4'+x);
+    el.classList.remove('selected','correct','wrong');
+    el.disabled = false;
+  });
+
+  // Reset chips
+  document.querySelectorAll('#chips-pool .chip').forEach(c => c.classList.remove('used'));
+  placedChips = [];
+  renderDropZone();
+
+  // Reset feedbacks
+  ['fb1','fb2','fb3','fb4','fb5'].forEach(id => {
+    const el = document.getElementById(id);
+    el.className = 'feedback-box'; el.textContent = '';
+  });
+
+  // Reset buttons
+  document.getElementById('confirm-q1').textContent = 'Confirmar respuesta';
+  document.getElementById('confirm-q2').textContent = 'Confirmar respuesta';
+  document.getElementById('confirm-q3').textContent = 'Confirmar respuesta';
+  document.getElementById('confirm-q4').textContent = 'Confirmar respuesta';
+  document.getElementById('confirm-q4').disabled = true;
+  document.getElementById('confirm-q5').textContent = 'Ver resultado';
+
+  // Reset sortable
+  const list = document.getElementById('sort-list');
+  // Shuffle items back to original scrambled order
+  const items = [...list.querySelectorAll('.sortable-item')];
+  items.forEach(i => { i.setAttribute('draggable', true); i.style.cursor = 'grab'; });
+  [items[1], items[0]].forEach(i => list.appendChild(i)); // slight re-order
+
+  // Reset match
+  document.querySelectorAll('#match-left .match-item, #match-right .match-item').forEach(el => {
+    el.classList.remove('selected','matched-ok','matched-err');
+  });
+
+  showScreen('screen-intro');
+}
+</script>
+</body>
+</html>
