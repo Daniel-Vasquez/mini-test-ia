@@ -474,38 +474,146 @@
       display: block;
     }
 
-    /* FILL — Completar */
-    .fill-sentence {
-      font-size: 16px;
-      line-height: 2.2;
+    /* FILL — Drag to blank */
+    .word-bank {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+      padding: 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+
+    .word-token {
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      background: var(--surface-2);
+      border: 1px solid var(--border-accent);
       color: var(--text);
+      cursor: grab;
+      user-select: none;
+      transition: all 0.15s;
+      white-space: nowrap;
     }
 
-    .fill-blank {
-      display: inline-block;
-      min-width: 120px;
-      border-bottom: 2px solid var(--accent);
-      padding: 0 4px 2px;
-      background: transparent;
+    .word-token:active {
+      cursor: grabbing;
+      transform: scale(0.96);
+    }
+
+    .word-token.used {
+      opacity: 0.25;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .word-token.dragging-src {
+      opacity: 0.35;
+    }
+
+    .fill-sentences {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .fill-row {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 18px;
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.9;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .fill-slot {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 110px;
+      height: 34px;
+      border-radius: 8px;
+      border: 2px dashed var(--accent);
+      background: var(--accent-dim);
       color: var(--accent);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 16px;
-      outline: none;
-      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 0 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      position: relative;
+      white-space: nowrap;
     }
 
-    .fill-blank::placeholder {
-      color: var(--text-dim);
+    .fill-slot.drag-over {
+      border-style: solid;
+      background: rgba(232, 201, 122, 0.2);
+      transform: scale(1.04);
     }
 
-    .fill-blank.ok {
-      border-color: var(--green);
-      color: var(--green);
+    .fill-slot.filled {
+      border-style: solid;
+      border-color: var(--accent);
+      color: var(--accent);
+      cursor: pointer;
     }
 
-    .fill-blank.err {
+    .fill-slot.filled:hover {
       border-color: var(--red);
       color: var(--red);
+      background: var(--red-dim);
+    }
+
+    .fill-slot.ok {
+      border-color: var(--green);
+      background: var(--green-dim);
+      color: var(--green);
+      cursor: default;
+    }
+
+    .fill-slot.err {
+      border-color: var(--red);
+      background: var(--red-dim);
+      color: var(--red);
+      cursor: default;
+    }
+
+    .fill-slot.empty-pulse {
+      animation: pulse-slot 1.2s ease infinite;
+    }
+
+    @keyframes pulse-slot {
+
+      0%,
+      100% {
+        border-color: rgba(232, 201, 122, 0.4);
+      }
+
+      50% {
+        border-color: var(--accent);
+      }
+    }
+
+    .word-token.selected-token {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+
+    .slot-placeholder {
+      color: var(--text-dim);
+      font-size: 12px;
+      font-weight: 400;
     }
 
     /* SCENARIO — Escenario */
@@ -1149,27 +1257,62 @@
         </div>
       </div>
 
-      <!-- Q3 — FILL: completar enunciados -->
+      <!-- Q3 — DRAG TO BLANK: arrastrar palabra al hueco correcto -->
       <div class="question-wrap" id="q3" style="display:none">
         <div class="question-card">
-          <div class="q-tag q-tag-accent">Completar</div>
+          <div class="q-tag q-tag-accent">Completar arrastrando</div>
           <div class="q-number">Pregunta 3 / 5</div>
-          <div class="q-text">Completa los enunciados con la palabra correcta.</div>
-          <div class="fill-sentence" style="margin-top:8px;">
-            <p style="margin-bottom:18px;">
-              La calidad de la respuesta de la IA depende principalmente del
-              <input class="fill-blank" id="fill1" placeholder="…" spellcheck="false">
-              que le des, no de la ortografía.
-            </p>
-            <p style="margin-bottom:18px;">
-              Cuando la IA genera un dato falso con total confianza, se llama
-              <input class="fill-blank" id="fill2" placeholder="…" spellcheck="false">.
-            </p>
-            <p>
-              Para evitar que la IA "se pierda", se recomienda que cada conversación tenga un solo
-              <input class="fill-blank" id="fill3" placeholder="…" spellcheck="false">.
-            </p>
+          <div class="q-text">Arrastra (o haz clic) en la palabra correcta para completar cada enunciado.</div>
+
+          <!-- Word bank -->
+          <div
+            style="font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-dim); margin-bottom:10px;">
+            Banco de palabras</div>
+          <div class="word-bank" id="word-bank">
+            <div class="word-token" data-word="contexto" draggable="true" onclick="tokenClick(this)">contexto</div>
+            <div class="word-token" data-word="alucinación" draggable="true" onclick="tokenClick(this)">alucinación
+            </div>
+            <div class="word-token" data-word="objetivo" draggable="true" onclick="tokenClick(this)">objetivo</div>
+            <div class="word-token" data-word="ortografía" draggable="true" onclick="tokenClick(this)">ortografía</div>
+            <div class="word-token" data-word="memoria" draggable="true" onclick="tokenClick(this)">memoria</div>
+            <div class="word-token" data-word="saturación" draggable="true" onclick="tokenClick(this)">saturación</div>
+            <div class="word-token" data-word="predicción" draggable="true" onclick="tokenClick(this)">predicción</div>
+            <div class="word-token" data-word="prompt" draggable="true" onclick="tokenClick(this)">prompt</div>
           </div>
+
+          <!-- Sentences with slots -->
+          <div class="fill-sentences">
+            <div class="fill-row">
+              <span>La calidad de la respuesta de la IA depende principalmente del</span>
+              <div class="fill-slot empty-pulse" id="slot1" data-correct="contexto"
+                ondragover="slotDragOver(event,this)" ondragleave="slotDragLeave(this)" ondrop="slotDrop(event,this)"
+                onclick="slotClick(this)">
+                <span class="slot-placeholder">suelta aquí</span>
+              </div>
+              <span>que le des, no de la ortografía.</span>
+            </div>
+
+            <div class="fill-row">
+              <span>Cuando la IA genera un dato falso con total confianza, eso se llama</span>
+              <div class="fill-slot empty-pulse" id="slot2" data-correct="alucinación"
+                ondragover="slotDragOver(event,this)" ondragleave="slotDragLeave(this)" ondrop="slotDrop(event,this)"
+                onclick="slotClick(this)">
+                <span class="slot-placeholder">suelta aquí</span>
+              </div>
+              <span>y siempre debes verificar datos importantes.</span>
+            </div>
+
+            <div class="fill-row">
+              <span>Para evitar que la IA "se pierda", cada conversación debe tener un solo</span>
+              <div class="fill-slot empty-pulse" id="slot3" data-correct="objetivo"
+                ondragover="slotDragOver(event,this)" ondragleave="slotDragLeave(this)" ondrop="slotDrop(event,this)"
+                onclick="slotClick(this)">
+                <span class="slot-placeholder">suelta aquí</span>
+              </div>
+              <span>claro.</span>
+            </div>
+          </div>
+
           <div class="feedback-box" id="fb3"></div>
         </div>
         <div class="nav-row">
@@ -1362,6 +1505,7 @@
       currentQ = n;
       if (n === 1) initSortable();
       if (n === 2) initMatch();
+      if (n === 3) initDragToBlank();
       updateBadges();
     }
 
@@ -1522,32 +1666,123 @@
       document.getElementById('confirm-q2').textContent = 'Siguiente →';
     }
 
-    // ─── Q3: Fill ────────────────────────────────────────────
-    const fillAnswers = [
-      { id: 'fill1', accepted: ['contexto', 'información', 'contexto que', 'información que'] },
-      { id: 'fill2', accepted: ['alucinación', 'alucinacion', 'alucinaciones'] },
-      { id: 'fill3', accepted: ['objetivo', 'propósito', 'proposito', 'tarea', 'objetivo claro'] }
-    ];
+    // ─── Q3: Drag to blank ───────────────────────────────────
+    let dragWord = null;        // word being dragged
+    let activeToken = null;     // token currently "selected" for click-mode
+    let slotContents = { slot1: null, slot2: null, slot3: null };
+
+    function initDragToBlank() {
+      dragWord = null; activeToken = null;
+      slotContents = { slot1: null, slot2: null, slot3: null };
+
+      document.querySelectorAll('.word-token').forEach(tok => {
+        tok.classList.remove('used', 'dragging-src', 'selected-token');
+        tok.addEventListener('dragstart', function (e) {
+          if (this.classList.contains('used')) { e.preventDefault(); return; }
+          dragWord = this.dataset.word;
+          activeToken = this;
+          this.classList.add('dragging-src');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        tok.addEventListener('dragend', function () {
+          this.classList.remove('dragging-src');
+          dragWord = null;
+        });
+      });
+    }
+
+    function tokenClick(tok) {
+      if (confirmed[2] || tok.classList.contains('used')) return;
+      // deselect previous
+      document.querySelectorAll('.word-token.selected-token').forEach(t => t.classList.remove('selected-token'));
+      if (activeToken === tok) { activeToken = null; return; }
+      tok.classList.add('selected-token');
+      activeToken = tok;
+    }
+
+    function slotClick(slot) {
+      if (confirmed[2]) return;
+      if (slot.classList.contains('ok') || slot.classList.contains('err')) return;
+      // If slot has content → return word to bank
+      if (slotContents[slot.id]) {
+        returnWordToBank(slotContents[slot.id]);
+        slotContents[slot.id] = null;
+        slot.classList.remove('filled');
+        slot.innerHTML = '<span class="slot-placeholder">suelta aquí</span>';
+        slot.classList.add('empty-pulse');
+        return;
+      }
+      // If a token is selected → place it
+      if (activeToken) {
+        placeWord(slot, activeToken.dataset.word);
+        activeToken.classList.remove('selected-token');
+        activeToken.classList.add('used');
+        activeToken = null;
+      }
+    }
+
+    function slotDragOver(e, slot) {
+      e.preventDefault();
+      if (!slot.classList.contains('ok') && !slot.classList.contains('err'))
+        slot.classList.add('drag-over');
+    }
+    function slotDragLeave(slot) { slot.classList.remove('drag-over'); }
+
+    function slotDrop(e, slot) {
+      e.preventDefault();
+      slot.classList.remove('drag-over');
+      if (!dragWord || slot.classList.contains('ok') || slot.classList.contains('err')) return;
+      // If slot already had a word, return it first
+      if (slotContents[slot.id]) returnWordToBank(slotContents[slot.id]);
+      placeWord(slot, dragWord);
+      if (activeToken) { activeToken.classList.add('used'); activeToken = null; }
+    }
+
+    function placeWord(slot, word) {
+      slotContents[slot.id] = word;
+      slot.classList.remove('empty-pulse');
+      slot.classList.add('filled');
+      slot.innerHTML = word + ' <span style="font-size:10px;opacity:0.5;margin-left:4px;">✕</span>';
+      // mark token as used
+      document.querySelectorAll('.word-token').forEach(t => {
+        if (t.dataset.word === word) t.classList.add('used');
+      });
+    }
+
+    function returnWordToBank(word) {
+      document.querySelectorAll('.word-token').forEach(t => {
+        if (t.dataset.word === word) t.classList.remove('used');
+      });
+    }
 
     function confirmQ3() {
       if (confirmed[2]) { nextQ(); return; }
+      const slots = ['slot1', 'slot2', 'slot3'];
       let correct = 0;
-      fillAnswers.forEach(({ id, accepted }) => {
-        const val = document.getElementById(id).value.trim().toLowerCase();
-        const ok = accepted.some(a => val.includes(a));
-        const el = document.getElementById(id);
-        el.classList.remove('ok', 'err');
-        el.classList.add(ok ? 'ok' : 'err');
-        if (ok) correct++;
-        el.disabled = true;
+      slots.forEach(id => {
+        const slot = document.getElementById(id);
+        const placed = slotContents[id];
+        const expected = slot.dataset.correct;
+        slot.classList.remove('filled', 'empty-pulse');
+        // remove click handler
+        slot.onclick = null;
+        if (placed === expected) {
+          slot.classList.add('ok');
+          slot.innerHTML = placed;
+          correct++;
+        } else {
+          slot.classList.add('err');
+          slot.innerHTML = placed ? `${placed} <span style="font-size:11px;margin-left:4px;">✗ era: ${expected}</span>` : `<span style="font-size:12px;">— era: ${expected}</span>`;
+        }
       });
 
       let score = 0, fbClass, fbMsg;
       if (correct === 3) {
-        score = 2; fbClass = 'correct-fb'; fbMsg = '✓ ¡Perfecto! Contexto → Alucinación → Objetivo.';
+        score = 2; fbClass = 'correct-fb';
+        fbMsg = '✓ ¡Perfecto! Contexto · Alucinación · Objetivo — exactamente como se explicó en el seminario.';
       } else if (correct >= 1) {
         score = 1; fbClass = 'partial-fb';
-        fbMsg = `⚡ ${correct}/3 correctas. Las respuestas son: (1) contexto, (2) alucinación, (3) objetivo.`;
+        fbMsg = `⚡ ${correct}/3 correctas. Respuestas: (1) contexto, (2) alucinación, (3) objetivo.`;
       } else {
         score = 0; fbClass = 'wrong-fb';
         fbMsg = '✗ Las respuestas correctas son: (1) contexto, (2) alucinación, (3) objetivo.';
@@ -1743,11 +1978,17 @@
       document.getElementById('player-name').value = '';
       document.getElementById('start-btn').disabled = true;
 
-      // Reset fills
-      ['fill1', 'fill2', 'fill3'].forEach(id => {
-        const el = document.getElementById(id);
-        el.value = ''; el.disabled = false;
-        el.classList.remove('ok', 'err');
+      // Reset drag-to-blank (Q3)
+      slotContents = { slot1: null, slot2: null, slot3: null };
+      dragWord = null; activeToken = null;
+      ['slot1', 'slot2', 'slot3'].forEach(id => {
+        const slot = document.getElementById(id);
+        slot.className = 'fill-slot empty-pulse';
+        slot.innerHTML = '<span class="slot-placeholder">suelta aquí</span>';
+        slot.onclick = function () { slotClick(this); };
+      });
+      document.querySelectorAll('.word-token').forEach(t => {
+        t.classList.remove('used', 'dragging-src', 'selected-token');
       });
 
       // Reset choices
