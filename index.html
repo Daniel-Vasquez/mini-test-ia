@@ -1125,17 +1125,148 @@
       min-height: 18px;
     }
 
+    /* TRUE / FALSE — Toggles */
+    .tf-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .tf-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 18px;
+      transition: border-color 0.2s;
+    }
+
+    .tf-row.correct-row {
+      border-color: var(--green);
+      background: var(--green-dim);
+    }
+
+    .tf-row.wrong-row {
+      border-color: var(--red);
+      background: var(--red-dim);
+    }
+
+    .tf-statement {
+      flex: 1;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .tf-row.correct-row .tf-statement {
+      color: var(--green);
+    }
+
+    .tf-row.wrong-row .tf-statement {
+      color: var(--red);
+    }
+
+    .tf-toggle {
+      flex-shrink: 0;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .tf-toggle input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .tf-track {
+      display: flex;
+      align-items: center;
+      width: 160px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--bg);
+      border: 1px solid var(--border-accent);
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .tf-toggle input:checked~.tf-track {
+      border-color: var(--green);
+    }
+
+    .tf-label-f,
+    .tf-label-v {
+      position: absolute;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: opacity 0.25s;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .tf-label-f {
+      left: 10px;
+      color: var(--red);
+      opacity: 1;
+    }
+
+    .tf-label-v {
+      right: 10px;
+      color: var(--green);
+      opacity: 0.35;
+    }
+
+    .tf-toggle input:checked~.tf-track .tf-label-f {
+      opacity: 0.35;
+    }
+
+    .tf-toggle input:checked~.tf-track .tf-label-v {
+      opacity: 1;
+    }
+
+    .tf-knob {
+      position: absolute;
+      left: 4px;
+      width: 68px;
+      height: 28px;
+      border-radius: 7px;
+      background: var(--red);
+      transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s;
+      z-index: 0;
+      opacity: 0.25;
+    }
+
+    .tf-toggle input:checked~.tf-track .tf-knob {
+      left: calc(100% - 72px);
+      background: var(--green);
+    }
+
+    .tf-result-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+      display: none;
+    }
+
+    .tf-row.correct-row .tf-result-icon,
+    .tf-row.wrong-row .tf-result-icon {
+      display: block;
+    }
+
     @media (max-width: 500px) {
-      .question-card {
-        padding: 24px 20px;
+      .tf-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
       }
 
-      .match-container {
-        grid-template-columns: 1fr;
-      }
-
-      .q-text {
-        font-size: 17px;
+      .tf-track {
+        width: 140px;
       }
     }
   </style>
@@ -1155,8 +1286,8 @@
       <div class="rules-card">
         <div class="rules-title">Cómo funciona</div>
         <div class="rule-item">
-          <div class="rule-num">1</div><span>Son 5 preguntas de distintos formatos: ordenar, emparejar, completar,
-            elegir y construir.</span>
+          <div class="rule-num">1</div><span>Son 5 preguntas de distintos formatos: ordenar, emparejar, completar
+            arrastrando, elegir y verdadero/falso.</span>
         </div>
         <div class="rule-item">
           <div class="rule-num">2</div><span>Cada pregunta vale hasta 2 puntos. Total: 10 puntos.</span>
@@ -1359,27 +1490,68 @@
         </div>
       </div>
 
-      <!-- Q5 — BUILD: armar un prompt con chips -->
+      <!-- Q5 — TRUE/FALSE: toggles sobre afirmaciones de IA -->
       <div class="question-wrap" id="q5" style="display:none">
         <div class="question-card">
-          <div class="q-tag q-tag-teal">Construir</div>
+          <div class="q-tag q-tag-teal">Verdadero o Falso</div>
           <div class="q-number">Pregunta 5 / 5</div>
-          <div class="q-text">Arrastra o haz clic en los elementos que sí deben estar en un prompt bien construido.
-            Ignora los que no pertenecen.</div>
-          <div style="margin-bottom:10px; font-size:13px; color:var(--text-muted);">Ingredientes disponibles:</div>
-          <div class="build-chips" id="chips-pool">
-            <div class="chip" data-val="rol" onclick="addChip(this)">🎭 Rol</div>
-            <div class="chip" data-val="tarea" onclick="addChip(this)">📋 Tarea</div>
-            <div class="chip" data-val="ortografia" onclick="addChip(this)">✍️ Buena ortografía</div>
-            <div class="chip" data-val="contexto" onclick="addChip(this)">📌 Contexto</div>
-            <div class="chip" data-val="formato" onclick="addChip(this)">📐 Formato</div>
-            <div class="chip" data-val="internet" onclick="addChip(this)">🌐 Activar internet</div>
-            <div class="chip" data-val="largo" onclick="addChip(this)">📜 Chat muy largo</div>
-          </div>
-          <div style="font-size:12px; color:var(--text-dim); margin-bottom:8px;">Tu prompt incluye:</div>
-          <div class="build-drop-zone" id="drop-zone">
-            <span class="build-drop-zone-label" id="dz-placeholder">Haz clic en los elementos de arriba para agregarlos
-              aquí…</span>
+          <div class="q-text">¿Cada afirmación es verdadera o falsa? Activa el switch si crees que es <strong
+              style="color:var(--green)">Verdadero</strong>.</div>
+
+          <div class="tf-list" id="tf-list">
+
+            <div class="tf-row" id="tfr1">
+              <div class="tf-statement">Si activas internet en la IA, esta puede recordar conversaciones pasadas de
+                otros días.</div>
+              <label class="tf-toggle">
+                <input type="checkbox" id="tf1" onchange="tfChange()">
+                <span class="tf-track">
+                  <span class="tf-label-f">Falso</span>
+                  <span class="tf-knob"></span>
+                  <span class="tf-label-v">Verdadero</span>
+                </span>
+              </label>
+            </div>
+
+            <div class="tf-row" id="tfr2">
+              <div class="tf-statement">Un prompt pobre siempre produce respuestas pobres, sin importar qué tan buena
+                sea la IA.</div>
+              <label class="tf-toggle">
+                <input type="checkbox" id="tf2" onchange="tfChange()">
+                <span class="tf-track">
+                  <span class="tf-label-f">Falso</span>
+                  <span class="tf-knob"></span>
+                  <span class="tf-label-v">Verdadero</span>
+                </span>
+              </label>
+            </div>
+
+            <div class="tf-row" id="tfr3">
+              <div class="tf-statement">La IA puede inventar hechos con total confianza aunque no tenga la información
+                correcta.</div>
+              <label class="tf-toggle">
+                <input type="checkbox" id="tf3" onchange="tfChange()">
+                <span class="tf-track">
+                  <span class="tf-label-f">Falso</span>
+                  <span class="tf-knob"></span>
+                  <span class="tf-label-v">Verdadero</span>
+                </span>
+              </label>
+            </div>
+
+            <div class="tf-row" id="tfr4">
+              <div class="tf-statement">Mezclar varias tareas en el mismo chat mejora los resultados porque la IA
+                aprende del contexto acumulado.</div>
+              <label class="tf-toggle">
+                <input type="checkbox" id="tf4" onchange="tfChange()">
+                <span class="tf-track">
+                  <span class="tf-label-f">Falso</span>
+                  <span class="tf-knob"></span>
+                  <span class="tf-label-v">Verdadero</span>
+                </span>
+              </label>
+            </div>
+
           </div>
           <div class="feedback-box" id="fb5"></div>
         </div>
@@ -1832,80 +2004,44 @@
       document.getElementById('confirm-q4').disabled = false;
     }
 
-    // ─── Q5: Build prompt ────────────────────────────────────
-    const correctChips = ['rol', 'tarea', 'contexto', 'formato'];
-    const wrongChips = ['ortografia', 'internet', 'largo'];
-    let placedChips = [];
+    // ─── Q5: True / False toggles ────────────────────────────
+    // Correct answers: tf1=false, tf2=true, tf3=true, tf4=false
+    const tfCorrect = { tf1: false, tf2: true, tf3: true, tf4: false };
 
-    function addChip(el) {
-      if (el.classList.contains('used') || confirmed[4]) return;
-      const val = el.dataset.val;
-      placedChips.push(val);
-      el.classList.add('used');
-      renderDropZone();
-    }
-
-    function removeChip(val) {
-      if (confirmed[4]) return;
-      placedChips = placedChips.filter((v, i) => {
-        if (v === val) { val = null; return false; }
-        return true;
-      });
-      // re-enable the chip
-      document.querySelectorAll('#chips-pool .chip').forEach(c => {
-        if (c.dataset.val === val) c.classList.remove('used');
-      });
-      // actually filter first occurrence
-      const idx = placedChips.indexOf(val);
-      renderDropZone();
-    }
-
-    function removeChipByIdx(val) {
-      if (confirmed[4]) return;
-      const idx = placedChips.indexOf(val);
-      if (idx !== -1) placedChips.splice(idx, 1);
-      document.querySelectorAll('#chips-pool .chip').forEach(c => {
-        if (c.dataset.val === val) c.classList.remove('used');
-      });
-      renderDropZone();
-    }
-
-    function renderDropZone() {
-      const dz = document.getElementById('drop-zone');
-      const ph = document.getElementById('dz-placeholder');
-      dz.querySelectorAll('.placed-chip').forEach(c => c.remove());
-      if (placedChips.length === 0) {
-        ph.style.display = 'block';
-        dz.classList.remove('has-items');
-      } else {
-        ph.style.display = 'none';
-        dz.classList.add('has-items');
-        placedChips.forEach(val => {
-          const labels = { rol: '🎭 Rol', tarea: '📋 Tarea', ortografia: '✍️ Buena ortografía', contexto: '📌 Contexto', formato: '📐 Formato', internet: '🌐 Activar internet', largo: '📜 Chat muy largo' };
-          const div = document.createElement('div');
-          div.className = 'placed-chip';
-          div.innerHTML = `${labels[val]} <span class="remove-x" onclick="removeChipByIdx('${val}')">✕</span>`;
-          dz.appendChild(div);
-        });
-      }
+    function tfChange() {
+      // nothing needed — state lives in checkboxes
     }
 
     function confirmQ5() {
       if (confirmed[4]) { showResults(); return; }
-      const goodPlaced = placedChips.filter(v => correctChips.includes(v));
-      const badPlaced = placedChips.filter(v => wrongChips.includes(v));
-      const missedGood = correctChips.filter(v => !placedChips.includes(v));
+      let correct = 0;
+      Object.entries(tfCorrect).forEach(([id, expected], i) => {
+        const cb = document.getElementById(id);
+        const row = document.getElementById('tfr' + (i + 1));
+        const userVal = cb.checked;
+        const ok = userVal === expected;
+        if (ok) correct++;
+
+        cb.disabled = true;
+        row.classList.add(ok ? 'correct-row' : 'wrong-row');
+
+        // inject result icon
+        const icon = document.createElement('span');
+        icon.className = 'tf-result-icon';
+        icon.textContent = ok ? '✓' : '✗';
+        row.appendChild(icon);
+      });
 
       let score = 0, fbClass, fbMsg;
-      if (goodPlaced.length === 4 && badPlaced.length === 0) {
+      if (correct === 4) {
         score = 2; fbClass = 'correct-fb';
-        fbMsg = '✓ ¡Perfecto! Seleccionaste exactamente los 4 ingredientes correctos: Rol, Tarea, Contexto y Formato.';
-      } else if (goodPlaced.length >= 2 && badPlaced.length <= 1) {
+        fbMsg = '✓ ¡Perfecto! Las 4 afirmaciones correctas. Internet no da memoria, un prompt pobre limita los resultados, la IA sí alucina, y mezclar tareas en un chat contamina el contexto.';
+      } else if (correct >= 2) {
         score = 1; fbClass = 'partial-fb';
-        fbMsg = `⚡ Casi. Los 4 ingredientes correctos son: Rol, Tarea, Contexto y Formato. La buena ortografía, internet activado o el chat largo no son ingredientes del prompt.`;
+        fbMsg = `⚡ ${correct}/4 correctas. Recuerda: (1) Falso — internet no da memoria entre sesiones. (2) Verdadero — el prompt define la calidad. (3) Verdadero — las alucinaciones son reales. (4) Falso — mezclar tareas daña el contexto.`;
       } else {
         score = 0; fbClass = 'wrong-fb';
-        fbMsg = '✗ Los ingredientes de un buen prompt son: Rol, Tarea, Contexto y Formato. La ortografía, el internet y los chats largos no mejoran el prompt por sí solos.';
+        fbMsg = '✗ Respuestas: (1) Falso, (2) Verdadero, (3) Verdadero, (4) Falso. Revisa los temas de ventana de contexto, alucinaciones y prompts del seminario.';
       }
       scores[4] = score;
       confirmed[4] = true;
@@ -1970,7 +2106,6 @@
     function resetExam() {
       scores = [0, 0, 0, 0, 0];
       confirmed = [false, false, false, false, false];
-      placedChips = [];
       q4Selected = null;
       matchState = { leftSel: null, rightSel: null, matched: {} };
 
@@ -1998,10 +2133,18 @@
         el.disabled = false;
       });
 
-      // Reset chips
-      document.querySelectorAll('#chips-pool .chip').forEach(c => c.classList.remove('used'));
-      placedChips = [];
-      renderDropZone();
+      // Reset True/False (Q5)
+      ['tf1', 'tf2', 'tf3', 'tf4'].forEach(id => {
+        const cb = document.getElementById(id);
+        cb.checked = false;
+        cb.disabled = false;
+      });
+      ['tfr1', 'tfr2', 'tfr3', 'tfr4'].forEach(id => {
+        const row = document.getElementById(id);
+        row.classList.remove('correct-row', 'wrong-row');
+        const icon = row.querySelector('.tf-result-icon');
+        if (icon) icon.remove();
+      });
 
       // Reset feedbacks
       ['fb1', 'fb2', 'fb3', 'fb4', 'fb5'].forEach(id => {
